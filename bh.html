@@ -33,7 +33,6 @@
   <canvas id="space"></canvas>
 
   <script>
-  // 基础设置
   const canvas = document.getElementById('space');
   const ctx = canvas.getContext('2d');
   let W = innerWidth, H = innerHeight;
@@ -46,7 +45,6 @@
   let absorbed = 0, flash = 0;
   let userImage = null;
 
-  // 生成粒子
   const count = 150;
   const particles = [];
   for (let i = 0; i < count; i++) {
@@ -72,11 +70,10 @@
     ctx.beginPath();
     ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
     ctx.closePath();
-    ctx.clip(); // 裁剪为圆形
+    ctx.clip(); 
     ctx.drawImage(img, center.x - w/2, center.y - h/2, w, h);
     ctx.restore();
 
-    // 光晕边界
     const g = ctx.createRadialGradient(center.x, center.y, radius * 0.5, center.x, center.y, radius * 1.4);
     g.addColorStop(0, "rgba(255,255,255,0.25)");
     g.addColorStop(1, "transparent");
@@ -113,14 +110,12 @@
     ctx.fillStyle = "rgba(0,0,0,0.2)";
     ctx.fillRect(0, 0, W, H);
 
-    // 绘制黑洞（自动圆形）
     if (userImage && userImage.complete) {
       drawRoundImage(userImage, blackHoleSize);
     } else {
       drawDefaultBlackHole();
     }
 
-    // 更新轨迹（降帧更新）
     if (++frameSkip % 2 === 0) {
       for (let p of particles) {
         p.angle += p.speed / p.radius * dt;
@@ -133,7 +128,6 @@
       }
     }
 
-    // 绘制香烟粒子 emoji
     ctx.font = "20px 'Segoe UI Emoji','Noto Color Emoji'";
     for (let p of particles) {
       const x = center.x + Math.cos(p.angle)*p.radius;
@@ -154,7 +148,7 @@
     requestAnimationFrame(animate);
   }
 
-  // 图片上传事件
+
   document.getElementById("fileInput").addEventListener("change", e => {
     const file = e.target.files[0];
     if (!file) return;
