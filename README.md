@@ -38,9 +38,9 @@ $$
 
 $$
 \begin{cases}
-a_{x_i} = -G M \dfrac{(x_i - x_c)}{r_i^3}, \\
+a_{x_i} = -G M \frac{(x_i - x_c)}{r_i^3}, \\
 
-a_{y_i} = -G M \dfrac{(y_i - y_c)}{r_i^3}.
+a_{y_i} = -G M \frac{(y_i - y_c)}{r_i^3}.
 \end{cases}
 $$
 
@@ -80,7 +80,7 @@ $$
 
 $$
 \begin{cases}
-\vec{v}_{t+1} = \vec{v}_t + \vec{a}_t \Delta t, \\[0.3em]
+\vec{v}_{t+1} = \vec{v}_t + \vec{a}_t \Delta t, \\
 \vec{r}_{t+1} = \vec{r}_t + \vec{v}_{t+1} \Delta t.
 \end{cases}
 $$
@@ -89,8 +89,8 @@ $$
 
 $$
 \begin{cases}
-r_{t+1} = r_t - \delta r, \\[0.3em]
-\theta_{t+1} = \theta_t + \sqrt{\dfrac{G M}{r_t^3}} \Delta t.
+r_{t+1} = r_t - \delta r, \\
+\theta_{t+1} = \theta_t + \sqrt{\frac{G M}{r_t^3}} \Delta t.
 \end{cases}
 $$
 
