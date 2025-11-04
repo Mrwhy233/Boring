@@ -38,7 +38,8 @@ $$
 
 $$
 \begin{cases}
-a_{x_i} = -G M \dfrac{(x_i - x_c)}{r_i^3}, \\[0.5em]
+a_{x_i} = -G M \dfrac{(x_i - x_c)}{r_i^3}, \\
+
 a_{y_i} = -G M \dfrac{(y_i - y_c)}{r_i^3}.
 \end{cases}
 $$
