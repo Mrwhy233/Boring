@@ -39,7 +39,6 @@ $$
 $$
 \begin{cases}
 a_{x_i} = -G M \frac{(x_i - x_c)}{r_i^3}, \\
-
 a_{y_i} = -G M \frac{(y_i - y_c)}{r_i^3}.
 \end{cases}
 $$
