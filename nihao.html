@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>3D N体模拟 (Three.js)</title>
+  <style>
+    body { margin: 0; overflow: hidden; background-color: black; }
+    #info {
+      position: absolute; top: 10px; left: 10px;
+      color: #0ff; font-family: monospace; font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">3D N-body Simulation 🌌 - orbit with mouse</div>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+
+  <script>
+    // === 初始化场景 ===
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 10000);
+    camera.position.z = 500;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 1);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    // === 照明 ===
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    // === 参数与常量 ===
+    const G = 5; // 引力常数
+    const dt = 0.02;
+    const numBodies = 200;
+    const maxPos = 500;
+    const bodies = [];
+
+    // === 粒子材质 ===
+    const geometry = new THREE.SphereGeometry(2, 8, 8);
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const group = new THREE.Group();
+    scene.add(group);
+
+    // === 初始化粒子 ===
+    for (let i = 0; i < numBodies; i++) {
+      const mesh = new THREE.Mesh(geometry, material.clone());
+      mesh.material.color.setHSL(Math.random(), 1, 0.7);
+
+      const body = {
+        mesh,
+        position: new THREE.Vector3(
+          (Math.random() - 0.5) * maxPos,
+          (Math.random() - 0.5) * maxPos,
+          (Math.random() - 0.5) * maxPos
+        ),
+        velocity: new THREE.Vector3(
+          (Math.random() - 0.5) * 2,
+          (Math.random() - 0.5) * 2,
+          (Math.random() - 0.5) * 2
+        ),
+        mass: Math.random() * 5 + 1,
+      };
+      mesh.position.copy(body.position);
+      bodies.push(body);
+      group.add(mesh);
+    }
+
+    // === 计算引力 ===
+    function computeForces() {
+      for (let i = 0; i < numBodies; i++) {
+        let ax = 0, ay = 0, az = 0;
+        for (let j = 0; j < numBodies; j++) {
+          if (i === j) continue;
+          const dx = bodies[j].position.x - bodies[i].position.x;
+          const dy = bodies[j].position.y - bodies[i].position.y;
+          const dz = bodies[j].position.z - bodies[i].position.z;
+          const distSq = dx * dx + dy * dy + dz * dz + 50; // softening
+          const dist = Math.sqrt(distSq);
+          const force = (G * bodies[j].mass) / distSq;
+          ax += force * dx / dist;
+          ay += force * dy / dist;
+          az += force * dz / dist;
+        }
+        bodies[i].velocity.x += ax * dt;
+        bodies[i].velocity.y += ay * dt;
+        bodies[i].velocity.z += az * dt;
+      }
+    }
+
+    // === 更新位置 ===
+    function updatePositions() {
+      bodies.forEach(b => {
+        b.position.addScaledVector(b.velocity, dt);
+        b.mesh.position.copy(b.position);
+      });
+    }
+
+    // === 动画循环 ===
+    function animate() {
+      requestAnimationFrame(animate);
+      computeForces();
+      updatePositions();
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // === 响应窗口变化 ===
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

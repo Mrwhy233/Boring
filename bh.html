@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚬 黑洞香烟吸积（圆形图片版）</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #000010 15%, #000);
+    font-family: "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  }
+  canvas { display: block; }
+  .ui {
+    position: absolute;
+    width: 100%;
+    top: 10px;
+    text-align: center;
+    color: #00ffff;
+    font-size: 14px;
+    text-shadow: 0 0 8px #00ffff;
+    z-index: 2;
+  }
+</style>
+</head>
+<body>
+  <div class="ui">
+    🌀 黑洞香烟吸积（圆形图片版） | 上传中心图片：
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <canvas id="space"></canvas>
+
+  <script>
+  // 基础设置
+  const canvas = document.getElementById('space');
+  const ctx = canvas.getContext('2d');
+  let W = innerWidth, H = innerHeight;
+  canvas.width = W; canvas.height = H;
+  const center = {x: W/2, y: H/2};
+
+  const emoji = "🚬";
+  const G = 0.045, dt = 0.75;
+  const blackHoleSize = 160;
+  let absorbed = 0, flash = 0;
+  let userImage = null;
+
+  // 生成粒子
+  const count = 150;
+  const particles = [];
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const r = Math.random() * 400 + 150;
+    const v = Math.sqrt(G * 2000 / r);
+    particles.push({
+      angle: a,
+      radius: r,
+      speed: v * (1 + Math.random() * 0.1),
+      size: 14 + Math.random() * 6,
+      color: `hsl(${190 + Math.random()*60}, 80%, 80%)`
+    });
+  }
+
+  function drawRoundImage(img, radius) {
+    const maxSide = Math.max(img.width, img.height);
+    const scale = radius * 2 / maxSide;
+    const w = img.width * scale;
+    const h = img.height * scale;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip(); // 裁剪为圆形
+    ctx.drawImage(img, center.x - w/2, center.y - h/2, w, h);
+    ctx.restore();
+
+    // 光晕边界
+    const g = ctx.createRadialGradient(center.x, center.y, radius * 0.5, center.x, center.y, radius * 1.4);
+    g.addColorStop(0, "rgba(255,255,255,0.25)");
+    g.addColorStop(1, "transparent");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, radius * 1.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawDefaultBlackHole() {
+    const g = ctx.createRadialGradient(center.x, center.y, 5, center.x, center.y, blackHoleSize);
+    g.addColorStop(0, "#fff");
+    g.addColorStop(0.3, "#4444ff");
+    g.addColorStop(1, "#000");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, blackHoleSize, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  function drawFlash() {
+    if (flash > 0) {
+      const glow = ctx.createRadialGradient(center.x, center.y, 0, center.x, center.y, 500);
+      glow.addColorStop(0, `rgba(255,255,200,${flash})`);
+      glow.addColorStop(1, "transparent");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0,0,W,H);
+      flash -= 0.03;
+    }
+  }
+
+  let frameSkip = 0;
+  function animate() {
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.fillRect(0, 0, W, H);
+
+    // 绘制黑洞（自动圆形）
+    if (userImage && userImage.complete) {
+      drawRoundImage(userImage, blackHoleSize);
+    } else {
+      drawDefaultBlackHole();
+    }
+
+    // 更新轨迹（降帧更新）
+    if (++frameSkip % 2 === 0) {
+      for (let p of particles) {
+        p.angle += p.speed / p.radius * dt;
+        p.radius -= 0.2;
+        if (p.radius < blackHoleSize * 0.6) {
+          absorbed++;
+          p.radius = Math.random() * 500 + 200;
+          p.angle = Math.random() * Math.PI * 2;
+        }
+      }
+    }
+
+    // 绘制香烟粒子 emoji
+    ctx.font = "20px 'Segoe UI Emoji','Noto Color Emoji'";
+    for (let p of particles) {
+      const x = center.x + Math.cos(p.angle)*p.radius;
+      const y = center.y + Math.sin(p.angle)*p.radius;
+      const a = Math.min(1, 400 / p.radius);
+      ctx.globalAlpha = a;
+      ctx.fillStyle = p.color;
+      ctx.fillText(emoji, x, y);
+    }
+
+    ctx.globalAlpha = 1;
+    if (absorbed > 120 && flash <= 0) {
+      flash = 1.2;
+      absorbed = 0;
+    }
+    drawFlash();
+
+    requestAnimationFrame(animate);
+  }
+
+  // 图片上传事件
+  document.getElementById("fileInput").addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      userImage = img;
+      console.log("✅ 图片已加载并将显示为圆形中心", img.width, "×", img.height);
+    };
+  });
+
+  animate();
+  </script>
+</body>
+</html>
